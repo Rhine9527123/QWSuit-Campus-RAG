@@ -1,0 +1,19 @@
+{
+  "_说明": "此文件用于自定义知识库文件的元数据标签。文件名作 key，category 和 source 作标签。",
+  "_格式": {
+    "文件名.txt": {
+      "category": "分类标签",
+      "source": "来源说明"
+    }
+  },
+  "_示例": {
+    "tax_policy.txt": {
+      "category": "税务政策",
+      "source": "国家税务总局"
+    },
+    "health_guide.pdf": {
+      "category": "医疗健康",
+      "source": "卫健委"
+    }
+  }
+}

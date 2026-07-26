@@ -1,0 +1,47 @@
+# ============================================================
+# RAG-Skeleton 通用知识库骨架 - Python 依赖清单
+# ============================================================
+# 用于 Docker 镜像构建 和 pip install -r requirements.txt
+# ============================================================
+
+# ---- FastAPI 服务 ----
+fastapi>=0.136.0
+uvicorn>=0.44.0
+python-multipart>=0.0.27
+
+# ---- LlamaIndex 核心 ----
+llama-index>=0.14.20
+llama-index-retrievers-bm25>=0.7.1
+llama-index-llms-openai-like>=0.7.1
+
+# ---- Embedding + Reranker ----
+sentence-transformers>=5.4.0
+
+# ---- 向量数据库 ----
+chromadb>=1.5.0
+
+# ---- PDF 解析 ----
+PyMuPDF>=1.27.0
+pytesseract>=0.3.13
+Pillow>=12.0.0
+
+# ---- Excel 解析 ----
+pandas>=2.2.0
+openpyxl>=3.1.0
+
+# ---- 爬虫 + 清洗 ----
+trafilatura>=2.0.0
+requests>=2.31.0
+
+# ---- 定时任务调度 ----
+apscheduler>=3.10.0
+
+# ---- 配置加载 ----
+python-dotenv>=1.0.0
+
+# ---- Streamlit 前端 ----
+streamlit>=1.41.0
+
+# ---- MCP (模型上下文协议) ----
+mcp>=1.0.0
+fastmcp>=0.5.0

@@ -1,0 +1,18 @@
+# 自动生成/大文件
+chroma_data_server/
+models/
+__pycache__/
+*.pyc
+*.db
+.env
+
+# 临时文件
+_start_backend_tmp.bat
+
+# IDE
+.vscode/
+.idea/
+
+# 操作系统
+.DS_Store
+Thumbs.db
