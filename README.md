@@ -2,7 +2,7 @@
 
 > **Qianwen Shenxin · Campus RAG Assistant**
 >
-> 基于开源 [RAG-Skeleton](https://github.com/Rhine9527123/RAG-Skeleton) 通用骨架二次开发，专为校园场景打造的智能问答系统。
+> 基于开源 [RAG-Skeleton](https://github.com/Rhine9527123/RAG-Skeleton) 为骨架，采用Trae IDE为开发工具进行二次开发，专为校园场景打造的智能问答系统。
 >
 > 📌 **2025 火山杯参赛作品**（深圳信息职业技术大学 × 字节跳动）
 
