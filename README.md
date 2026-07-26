@@ -4,7 +4,7 @@
 >
 > 基于开源 [RAG-Skeleton](https://github.com/Rhine9527123/RAG-Skeleton) 通用骨架二次开发，专为校园场景打造的智能问答系统。
 >
-> 📌 **2025 火山杯参赛作品**（深圳信息职业技术学院 × 字节跳动）
+> 📌 **2025 火山杯参赛作品**（深圳信息职业技术大学 × 字节跳动）
 
 <p align="center">
   <a href="https://www.trae.ai"><img src="https://img.shields.io/badge/Built%20with-Trae-blue.svg" alt="Built with Trae"></a>
