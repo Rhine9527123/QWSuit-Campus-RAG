@@ -5,6 +5,7 @@ __pycache__/
 *.pyc
 *.db
 .env
+config.json
 
 # 临时文件
 _start_backend_tmp.bat
