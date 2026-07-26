@@ -7,5 +7,5 @@ echo  公网地址: https://qwsuit.site
 echo  请勿关闭此窗口
 echo ========================================
 echo.
-"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel run finance-rag
+"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel run --protocol http2 finance-rag
 pause
