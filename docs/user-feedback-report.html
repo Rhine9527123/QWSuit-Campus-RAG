@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千问深信 · 用户体验调查分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d29;
+    --card-hover: #22263a;
+    --border: #2d3148;
+    --text: #e4e6ef;
+    --text-dim: #8b8fa3;
+    --accent: #4f8cff;
+    --accent2: #36d399;
+    --accent3: #f59e0b;
+    --accent4: #ef4444;
+    --accent5: #a78bfa;
+    --accent6: #ec4899;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    line-height: 1.7;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1d29 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 5% 40px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4f8cff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .header .subtitle { color: var(--text-dim); font-size: 15px; }
+  .header .meta {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header .meta span {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .header .meta span b { color: var(--accent); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 5%; }
+
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    padding-left: 14px;
+    border-left: 4px solid var(--accent);
+  }
+  .section-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; padding-left: 18px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .chart-box { position: relative; width: 100%; }
+
+  /* KPI cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .kpi .num { font-size: 36px; font-weight: 800; }
+  .kpi .label { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .kpi.blue .num { color: var(--accent); }
+  .kpi.green .num { color: var(--accent2); }
+  .kpi.amber .num { color: var(--accent3); }
+  .kpi.purple .num { color: var(--accent5); }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--text-dim); font-weight: 600; font-size: 13px; }
+  td:first-child, th:first-child { text-align: left; }
+  tr:hover td { background: var(--card-hover); }
+  .score-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .score-5 { background: rgba(54,211,153,0.15); color: #36d399; }
+  .score-4 { background: rgba(79,140,255,0.15); color: #4f8cff; }
+  .score-3 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+  /* Highlights */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(79,140,255,0.08), rgba(167,139,250,0.08));
+    border: 1px solid rgba(79,140,255,0.3);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .highlight-box .quote {
+    font-size: 16px;
+    font-style: italic;
+    color: var(--accent5);
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .highlight-box .source { font-size: 13px; color: var(--text-dim); }
+
+  /* Findings */
+  .finding-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .finding-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .finding-icon.green { background: rgba(54,211,153,0.15); color: #36d399; }
+  .finding-icon.amber { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .finding-icon.blue { background: rgba(79,140,255,0.15); color: #4f8cff; }
+  .finding-icon.red { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .finding-text { flex: 1; }
+  .finding-text b { color: var(--text); }
+  .finding-text p { color: var(--text-dim); font-size: 14px; margin-top: 2px; }
+
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+  .tag .count { color: var(--accent); font-weight: 700; margin-left: 4px; }
+
+  .footer {
+    text-align: center;
+    padding: 32px 5%;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>千问深信 · 用户体验调查分析报告</h1>
+  <div class="subtitle">Qianwen Shenxin — User Experience Survey Analysis</div>
+  <div class="meta">
+    <span>样本量：<b>4 份</b></span>
+    <span>教师问卷：<b>1 份</b></span>
+    <span>学生问卷：<b>3 份</b></span>
+    <span>所属学院：中德机器人学院</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi blue">
+      <div class="num">4.88</div>
+      <div class="label">教师综合评分（满分5）</div>
+    </div>
+    <div class="kpi green">
+      <div class="num">3.96</div>
+      <div class="label">学生综合评分（满分5）</div>
+    </div>
+    <div class="kpi amber">
+      <div class="num">4.67</div>
+      <div class="label">界面操作最高分（学生）</div>
+    </div>
+    <div class="kpi purple">
+      <div class="num">3.33</div>
+      <div class="label">复合问题处理最低分</div>
+    </div>
+  </div>
+
+  <!-- 教师金句 -->
+  <div class="highlight-box">
+    <div class="quote">"把写在抽屉里的制度，变成了学生敢问、能信、随时可用的校园基础设施。"</div>
+    <div class="source">—— 专业课教师 · 中德机器人学院</div>
+  </div>
+
+  <!-- ========= 1. 样本概况 ========= -->
+  <div class="section">
+    <div class="section-title">一、样本概况</div>
+    <div class="section-desc">4 位受访者基本信息分布</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">受访者身份构成</div>
+        <div class="chart-box"><canvas id="chartIdentity"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">学生年级分布</div>
+        <div class="chart-box"><canvas id="chartGrade"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">了解渠道</div>
+      <div class="chart-box"><canvas id="chartChannel"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 2. 学生核心体验评分 ========= -->
+  <div class="section">
+    <div class="section-title">二、学生核心体验评分</div>
+    <div class="section-desc">8 项指标 · 1=非常不满意，5=非常满意</div>
+
+    <div class="card">
+      <div class="card-title">各项评分雷达图（3 位学生 + 均值）</div>
+      <div class="chart-box" style="max-width:520px;margin:0 auto;"><canvas id="chartRadar"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">各项评分明细对比</div>
+      <div class="chart-box"><canvas id="chartStudentBar"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">评分明细表</div>
+      <table>
+        <thead>
+          <tr>
+            <th>评价项目</th>
+            <th>学生A（大一）</th>
+            <th>学生B（大二）</th>
+            <th>学生C（大二）</th>
+            <th>平均分</th>
+          </tr>
+        </thead>
+        <tbody id="scoreTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========= 3. 教师评估 ========= -->
+  <div class="section">
+    <div class="section-title">三、教师系统价值评估</div>
+    <div class="section-desc">8 项指标 · 教师视角打分</div>
+
+    <div class="card">
+      <div class="card-title">教师评分柱状图</div>
+      <div class="chart-box"><canvas id="chartTeacherBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 4. 师生对比 ========= -->
+  <div class="section">
+    <div class="section-title">四、师生评价对比</div>
+    <div class="section-desc">选取 5 个可对比维度</div>
+
+    <div class="card">
+      <div class="chart-box"><canvas id="chartCompare"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 5. 使用习惯 ========= -->
+  <div class="section">
+    <div class="section-title">五、使用习惯与信息来源</div>
+    <div class="section-desc">使用前获取校园信息的渠道（学生多选）</div>
+
+    <div class="card">
+      <div class="chart-box"><canvas id="chartSources"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 6. 对比通用AI优势 ========= -->
+  <div class="section">
+    <div class="section-title">六、对比通用 AI 的核心优势</div>
+    <div class="section-desc">"与 DeepSeek/ChatGPT 相比，千问深信好在哪"（学生多选）</div>
+
+    <div class="card">
+      <div class="chart-box"><canvas id="chartAdvantage"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 7. 问题与改进 ========= -->
+  <div class="section">
+    <div class="section-title">七、用户反馈的问题</div>
+    <div class="section-desc">使用过程中遇到的问题（学生多选）</div>
+
+    <div class="card">
+      <div class="chart-box"><canvas id="chartProblems"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ========= 8. 期望功能 ========= -->
+  <div class="section">
+    <div class="section-title">八、用户期望增加的功能</div>
+    <div class="section-desc">学生期望 + 教师期望</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">学生期望功能</div>
+        <div class="chart-box"><canvas id="chartStudentWish"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">教师期望功能</div>
+        <div class="chart-box"><canvas id="chartTeacherWish"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========= 9. 教师痛点与场景 ========= -->
+  <div class="section">
+    <div class="section-title">九、教师视角：痛点解决与适用场景</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">解决的一线痛点</div>
+        <div class="chart-box"><canvas id="chartPain"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">最适合的推广场景</div>
+        <div class="tag-cloud" style="padding-top:20px;">
+          <span class="tag">新生入学季<span class="count">✓</span></span>
+          <span class="tag">日常学生事务<span class="count">✓</span></span>
+          <span class="tag">毕业季<span class="count">✓</span></span>
+          <span class="tag">校园生活服务<span class="count">✓</span></span>
+        </div>
+        <p style="color:var(--text-dim);font-size:14px;margin-top:16px;">教师认为全部 4 个场景均适合推广，覆盖学生全生命周期。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========= 10. 开放反馈 ========= -->
+  <div class="section">
+    <div class="section-title">十、开放反馈精选</div>
+    <div class="section-desc">来自教师与学生的真实声音</div>
+
+    <div class="highlight-box">
+      <div class="quote">"「千问深信」的最大价值不是'能回答问题'，而是把校园里那些'明明写了但没人看得完'的制度文本，变成了可交互的决策依据。"</div>
+      <div class="source">—— 教师 · 最大价值评价</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">学生改进建议</div>
+      <div class="finding-item">
+        <div class="finding-icon amber">!</div>
+        <div class="finding-text">
+          <b>知识库需扩充</b>
+          <p>"现有问题都回答得挺准确的，知识库可以再完善一下，如转专业要求、奖学金、专业竞赛这类学生比较关注的问题。" —— 学生B</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon blue">A</div>
+        <div class="finding-text">
+          <b>满意体验</b>
+          <p>"可以问学校奖学金等制度相关问题。" —— 学生C</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========= 11. 核心发现 ========= -->
+  <div class="section">
+    <div class="section-title">十一、核心发现与建议</div>
+
+    <div class="card">
+      <div class="finding-item">
+        <div class="finding-icon green">1</div>
+        <div class="finding-text">
+          <b>界面体验是最大亮点</b>
+          <p>学生界面操作评分均达 4-5 分（均值 4.67），教师同样给出 5 分满分。系统"简洁清晰、容易上手"的设计目标已达成。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon green">2</div>
+        <div class="finding-text">
+          <b>校园专属问题回答能力是核心壁垒</b>
+          <p>3 位学生全部选择"能回答校园专属问题（通用AI答不了）"作为最大优势，这是千问深信区别于 ChatGPT/DeepSeek 的根本竞争力。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon green">3</div>
+        <div class="finding-text">
+          <b>教师认可度极高（均分 4.88/5）</b>
+          <p>教师愿意推荐给学生（5分）、认可推广价值（5分），并愿意接受后续访谈。教师视角充分肯定系统的实际应用意义。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon amber">4</div>
+        <div class="finding-text">
+          <b>复合问题处理是最大短板（均分 3.33）</b>
+          <p>学生和教师均对此项评分偏低（教师 4 分，2 位学生仅 3 分）。多问题拆分能力需重点优化，这是 RAG 系统的技术难点。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon amber">5</div>
+        <div class="finding-text">
+          <b>答案完整性与知识库覆盖待提升</b>
+          <p>答案完整性均分 3.33，2/3 学生遇到"问的问题系统没回答出来"。学生明确建议扩充转专业、奖学金、专业竞赛等高频知识。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon red">6</div>
+        <div class="finding-text">
+          <b>稳定性问题需关注</b>
+          <p>1 位学生反馈"页面打不开/报错"，1 位反馈"回答太慢"。生产环境部署需优化响应速度与服务稳定性。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon blue">7</div>
+        <div class="finding-text">
+          <b>教师管理后台是高价值需求</b>
+          <p>教师明确期望"查看学生提问热词/高频问题统计"和"数据分析报表"。这既能帮助教师了解学生需求，也能反哺知识库优化方向。</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-icon blue">8</div>
+        <div class="finding-text">
+          <b>移动端有需求但非紧急</b>
+          <p>1 位学生希望手机 App/小程序，1 位学生认为"目前功能已够用"。当前优先级应放在知识库扩充和稳定性优化上。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  千问深信 · 用户体验调查分析报告 | 生成日期：2026-07-27 | 样本量：4 份（1 教师 + 3 学生）
+</div>
+
+<script>
+// ============ Data ============
+const studentLabels = ['答案准确性','答案完整性','响应速度','来源标注','复合问题处理','界面操作','猜你想问','整体满意度'];
+const studentA = [4,3,4,4,3,4,4,4]; // User4 大一
+const studentB = [4,4,4,5,4,5,4,5]; // User5 大二
+const studentC = [4,3,3,4,3,5,4,4]; // User6 大二
+const studentAvg = studentLabels.map((_,i) => ((studentA[i]+studentB[i]+studentC[i])/3).toFixed(2));
+
+const teacherLabels = ['帮助新生获取信息','答案准确性可信任','减少重复工作量','复合问题拆分实用','来源可追溯','界面简洁易上手','愿意推荐给学生','有推广价值'];
+const teacherScores = [5,5,5,4,5,5,5,5];
+
+// Chart defaults
+Chart.defaults.color = '#8b8fa3';
+Chart.defaults.borderColor = '#2d3148';
+Chart.defaults.font.family = "'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif";
+
+const palette = ['#4f8cff','#36d399','#f59e0b','#a78bfa','#ef4444','#ec4899','#06b6d4','#f97316'];
+
+// ============ 1. Identity ============
+new Chart(document.getElementById('chartIdentity'), {
+  type: 'doughnut',
+  data: {
+    labels: ['学生','教师'],
+    datasets: [{ data: [3,1], backgroundColor: ['#4f8cff','#a78bfa'], borderWidth: 0 }]
+  },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+
+// ============ Grade ============
+new Chart(document.getElementById('chartGrade'), {
+  type: 'doughnut',
+  data: {
+    labels: ['大一新生','大二'],
+    datasets: [{ data: [1,2], backgroundColor: ['#36d399','#f59e0b'], borderWidth: 0 }]
+  },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+
+// ============ Channel ============
+new Chart(document.getElementById('chartChannel'), {
+  type: 'bar',
+  data: {
+    labels: ['同学/朋友推荐','学生推荐/演示','辅导员/老师推荐','班级群/朋友圈','自己搜索'],
+    datasets: [{
+      label: '人数',
+      data: [3,1,0,0,0],
+      backgroundColor: ['#4f8cff','#a78bfa','#36d399','#f59e0b','#ef4444'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+
+// ============ Radar ============
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: studentLabels,
+    datasets: [
+      { label: '学生A（大一）', data: studentA, borderColor: '#4f8cff', backgroundColor: 'rgba(79,140,255,0.1)', borderWidth: 2, pointRadius: 4 },
+      { label: '学生B（大二）', data: studentB, borderColor: '#36d399', backgroundColor: 'rgba(54,211,153,0.1)', borderWidth: 2, pointRadius: 4 },
+      { label: '学生C（大二）', data: studentC, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, pointRadius: 4 },
+      { label: '平均', data: studentAvg, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.15)', borderWidth: 3, pointRadius: 5, borderDash: [5,5] },
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#2d3148' }, angleLines: { color: '#2d3148' }, pointLabels: { font: { size: 12 } } } },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ============ Student Bar ============
+new Chart(document.getElementById('chartStudentBar'), {
+  type: 'bar',
+  data: {
+    labels: studentLabels,
+    datasets: [
+      { label: '学生A（大一）', data: studentA, backgroundColor: '#4f8cff', borderRadius: 4 },
+      { label: '学生B（大二）', data: studentB, backgroundColor: '#36d399', borderRadius: 4 },
+      { label: '学生C（大二）', data: studentC, backgroundColor: '#f59e0b', borderRadius: 4 },
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ============ Score Table ============
+const scoreTableData = [
+  ['答案准确性', 4, 4, 4, '4.00'],
+  ['答案完整性', 3, 4, 3, '3.33'],
+  ['响应速度', 4, 4, 3, '3.67'],
+  ['来源标注', 4, 5, 4, '4.33'],
+  ['复合问题处理', 3, 4, 3, '3.33'],
+  ['界面操作', 4, 5, 5, '4.67'],
+  ['猜你想问', 4, 4, 4, '4.00'],
+  ['整体满意度', 4, 5, 4, '4.33'],
+];
+const tbody = document.getElementById('scoreTable');
+scoreTableData.forEach(row => {
+  const tr = document.createElement('tr');
+  const avg = parseFloat(row[4]);
+  const cls = avg >= 4.5 ? 'score-5' : avg >= 4 ? 'score-4' : 'score-3';
+  tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td><span class="score-badge ${cls}">${row[4]}</span></td>`;
+  tbody.appendChild(tr);
+});
+
+// ============ Teacher Bar ============
+new Chart(document.getElementById('chartTeacherBar'), {
+  type: 'bar',
+  data: {
+    labels: teacherLabels,
+    datasets: [{
+      label: '教师评分',
+      data: teacherScores,
+      backgroundColor: teacherScores.map(s => s === 5 ? '#36d399' : '#f59e0b'),
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    scales: { x: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ============ Compare ============
+new Chart(document.getElementById('chartCompare'), {
+  type: 'radar',
+  data: {
+    labels: ['答案准确性','来源可追溯','界面易用性','复合问题处理','推荐意愿'],
+    datasets: [
+      { label: '教师', data: [5,5,5,4,5], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.15)', borderWidth: 2, pointRadius: 5 },
+      { label: '学生均值', data: [4.00,4.33,4.67,3.33,4.33], borderColor: '#4f8cff', backgroundColor: 'rgba(79,140,255,0.15)', borderWidth: 2, pointRadius: 5 },
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#2d3148' }, angleLines: { color: '#2d3148' }, pointLabels: { font: { size: 13 } } } },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ============ Sources ============
+new Chart(document.getElementById('chartSources'), {
+  type: 'bar',
+  data: {
+    labels: ['学长学姐/同学','学校官网/公众号','小红书/抖音等','新生群聊天记录','问辅导员/老师','搜索百度/通用AI'],
+    datasets: [{
+      label: '人数',
+      data: [3,3,1,1,1,0],
+      backgroundColor: palette,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ============ Advantage ============
+new Chart(document.getElementById('chartAdvantage'), {
+  type: 'bar',
+  data: {
+    labels: ['能回答校园专属问题','答案来源可查可核实','答案更准确不编造','能一次答多个问题','响应速度更快'],
+    datasets: [{
+      label: '选择人数',
+      data: [3,2,1,0,0],
+      backgroundColor: ['#36d399','#4f8cff','#a78bfa','#f59e0b','#ef4444'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ============ Problems ============
+new Chart(document.getElementById('chartProblems'), {
+  type: 'bar',
+  data: {
+    labels: ['问的问题没回答出来','答案不准确/有错误','回答太慢等待长','答案有重复内容','页面打不开/报错'],
+    datasets: [{
+      label: '反馈人数',
+      data: [2,1,1,1,1],
+      backgroundColor: ['#ef4444','#f59e0b','#f97316','#ec4899','#a78bfa'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ============ Student Wish ============
+new Chart(document.getElementById('chartStudentWish'), {
+  type: 'bar',
+  data: {
+    labels: ['宿舍/食堂评价','校园地图导航','课表/考试安排','手机App/小程序','社团活动信息','目前功能已够用'],
+    datasets: [{
+      label: '期望人数',
+      data: [2,1,1,1,1,1],
+      backgroundColor: palette,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ============ Teacher Wish ============
+new Chart(document.getElementById('chartTeacherWish'), {
+  type: 'doughnut',
+  data: {
+    labels: ['教师管理后台','通知推送功能','数据分析报表','知识库在线编辑','多模态升级(图片/语音)','接入企业微信'],
+    datasets: [{
+      data: [1,1,1,0,0,0],
+      backgroundColor: ['#4f8cff','#36d399','#a78bfa','#f59e0b','#ec4899','#06b6d4'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', labels: { font: { size: 12 } } } }
+  }
+});
+
+// ============ Pain Points ============
+new Chart(document.getElementById('chartPain'), {
+  type: 'doughnut',
+  data: {
+    labels: ['校园信息分散','通用AI答不准会编造','新生入学迷茫','学生反复问同样问题'],
+    datasets: [{
+      data: [1,1,1,0],
+      backgroundColor: ['#ef4444','#f59e0b','#4f8cff','#36d399'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
+  }
+});
+</script>
+
+</body>
+</html>
