@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "千问深信": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "env": {
+        "RAG_BASE_URL": "http://localhost:8000"
+      }
+    }
+  }
+}

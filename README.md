@@ -183,7 +183,7 @@ LLM 流式输出常见问题：「分点重复（1. xxx 1. xxx）」「整句重
   "mcpServers": {
     "千问深信": {
       "command": "python",
-      "args": ["server.py"],
+      "args": ["mcp_server.py"],
       "env": {
         "DEEPSEEK_API_KEY": "sk-xxx"
       }
@@ -284,7 +284,7 @@ LLM 流式输出常见问题：「分点重复（1. xxx 1. xxx）」「整句重
 | **向量数据库** | ChromaDB |
 | **公网部署** | Cloudflare Tunnel + `启动穿透.bat` | 稳定公网访问，无需云服务器 |
 | **一键启动** | `启动.bat`（Windows） | 自动检测 Ollama → 启动后端 → 等待就绪 → 拉起前端 |
-| **多端接入** | MCP 协议（Hermes / OpenClaw / Trae / 飞书 / 微信等） | 开放协议，全客户端通用，无需逐个适配 |
+| **多端接入** | MCP 协议（Hermes / OpenClaw / Trae / 飞书 / 微信等），独立 `mcp_server.py` 桥接层 | 9 个 MCP 工具，通过 stdio 与 AI 客户端通信 |
 
 ---
 
@@ -556,7 +556,7 @@ RAG-Skeleton 是一个「即插即用」的 RAG 系统骨架——丢进知识�
 - 新增 **复合问题拆分** 能力（规则初判 + LLM 复核）
 - 新增 **答案去重清理** 流水线（非流式生成 → 多层去重 → 逐字推送）
 - 配置 **校园领域预设**（含 40 个预置高频问题 + 猜你想问快捷入口）
-- 新增 **MCP 协议接入**（Trae IDE 已接入，可扩展至 Hermes / OpenClaw / 飞书 / 微信）
+- 新增 **MCP 协议接入**（独立 `mcp_server.py` 桥接层，9 个 MCP 工具，Trae IDE 已接入）
 - 部署至 **公网可访问**（Cloudflare 隧道）
 - 支持 **一键启动**（Windows 批处理脚本）
 
