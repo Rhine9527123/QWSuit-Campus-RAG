@@ -122,4 +122,70 @@ README.md 全篇中文乱码，GitHub 上显示为 GBK 乱码。
 
 ---
 
+---
+
+## 2026-07-28：.bat 文件中文乱码（编码规范）
+
+### 问题描述
+创建 `启动评测面板.bat` 后，双击运行出现中文乱码。
+
+### Root Cause 分析
+- **直接原因**：bat 文件以 UTF-8 编码保存，但 Windows cmd 默认使用 GBK 编码读取
+- **触发条件**：
+  1. 用 PowerShell `Set-Content` 或 Python `write(encoding="utf-8")` 写入 bat 文件
+  2. cmd 执行时用 GBK 解码，UTF-8 中文变成乱码
+  3. `chcp 65001` 切换代码页本身在中文 Windows 下有兼容问题，反而加剧乱码
+
+### 修复方案
+- **用 GBK 编码写入 bat 文件**：`[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::GetEncoding("gbk"))`
+- **避免在 bat 中使用中文**：窗口标题、提示信息尽量用英文
+- **不要加 `chcp 65001`**：保持 cmd 默认编码，减少编码转换风险
+
+### .bat 文件编码 Checklist（以后做 .bat 时必须核查）
+
+| 检查项 | 要求 |
+|--------|------|
+| 文件编码 | **必须用 GBK**，不要用 UTF-8 |
+| 中文内容 | 尽量避免，必须用时确保 GBK 编码正确 |
+| chcp 命令 | **不要加** `chcp 65001` 或任何代码页切换 |
+| 路径包含中文 | 尽量避免，如 `D:\千问深信` 可接受但需测试 |
+| 测试方法 | 双击运行，看 cmd 窗口显示是否正常 |
+
+### 正确示例（GBK 编码）
+```bat
+@echo off
+echo [1/2] Starting panel API on port 8002...
+start "Eval Panel API" cmd /k "cd /d D:\千问深信 && python -m uvicorn eval.panel_api:app --host 0.0.0.0 --port 8002"
+timeout /t 3 /nobreak >nul
+echo [2/2] Starting panel frontend on port 8003...
+start "Eval Panel Frontend" cmd /k "python -m http.server 8003 --directory D:\千问深信\eval\panel"
+timeout /t 2 /nobreak >nul
+echo.
+echo   Panel: http://localhost:8003
+echo   API: http://localhost:8002
+echo.
+pause
+```
+
+### 错误示例（UTF-8 编码，会导致乱码）
+```bat
+@echo off
+chcp 65001 >nul  // ❌ 不要加这行
+title 千问深信 · 评测面板  // ❌ 中文标题可能乱码
+echo 启动面板中...  // ❌ 中文 echo 在 UTF-8 bat 中会乱码
+```
+
+### PowerShell 写入 GBK bat 的正确方式
+```powershell
+$gbk = [System.Text.Encoding]::GetEncoding("gbk")
+$content = @'
+@echo off
+echo Starting...
+pause
+'@
+[System.IO.File]::WriteAllText("D:\path\script.bat", $content, $gbk)
+```
+
+---
+
 *日志持续更新中...*
