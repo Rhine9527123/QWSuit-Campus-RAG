@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千问深信 · 评测面板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d29; --card-hover: #22263a;
+    --border: #2d3148; --text: #e4e6ef; --dim: #8b8fa3;
+    --accent: #4f8cff; --green: #36d399; --amber: #f59e0b; --red: #ef4444; --purple: #a78bfa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; line-height: 1.7; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1d29 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 5% 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header h1 { font-size: 24px; background: linear-gradient(135deg, #4f8cff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .subtitle { font-size: 13px; color: var(--dim); margin-top: 4px; }
+  .header .actions { display: flex; gap: 10px; }
+  .btn {
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer; font-size: 13px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--card-hover); border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #3a7af0; }
+
+  /* Layout */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 5%; }
+
+  /* Section */
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 6px;
+    padding-left: 14px; border-left: 4px solid var(--accent);
+  }
+  .section-desc { color: var(--dim); font-size: 13px; margin-bottom: 20px; padding-left: 18px; }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr; } }
+  .kpi {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px 20px; text-align: center; transition: all 0.2s;
+  }
+  .kpi:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .kpi .num { font-size: 36px; font-weight: 800; }
+  .kpi .label { font-size: 12px; color: var(--dim); margin-top: 6px; line-height: 1.4; }
+  .kpi.blue .num { color: var(--accent); }
+  .kpi.green .num { color: var(--green); }
+  .kpi.purple .num { color: var(--purple); }
+  .kpi.amber .num { color: var(--amber); }
+
+  /* Chart Card */
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .chart-card .card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .chart-box { position: relative; width: 100%; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Run Cards */
+  .run-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px; margin-bottom: 16px; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 16px;
+  }
+  .run-card:hover { border-color: var(--accent); background: var(--card-hover); }
+  .run-id { font-size: 20px; font-weight: 800; color: var(--accent); min-width: 50px; }
+  .run-info { flex: 1; }
+  .run-meta { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .run-scores { display: flex; gap: 8px; }
+  .score-pill {
+    padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  }
+  .score-pill.good { background: rgba(54,211,153,0.15); color: var(--green); }
+  .score-pill.mid { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .score-pill.bad { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* Item Card (detail view) */
+  .item-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .item-id { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .item-category {
+    padding: 3px 10px; border-radius: 10px; font-size: 12px;
+    font-weight: 600; background: rgba(79,140,255,0.1); color: var(--accent);
+  }
+  .item-q { font-size: 15px; font-weight: 600; margin-bottom: 12px; padding: 12px; background: rgba(79,140,255,0.05); border-radius: 8px; border-left: 3px solid var(--accent); }
+  .item-scores { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .item-body { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .item-body { grid-template-columns: 1fr; } }
+  .section-label { font-size: 12px; color: var(--dim); margin-bottom: 6px; font-weight: 600; }
+  .item-ref { font-size: 13px; color: var(--text); background: rgba(54,211,153,0.05); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green); }
+  .item-ans { font-size: 13px; color: var(--dim); background: rgba(245,158,11,0.05); padding: 12px; border-radius: 8px; border-left: 3px solid var(--amber); }
+
+  /* Category Table */
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .cat-table th, .cat-table td { padding: 12px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+  .cat-table th { color: var(--dim); font-weight: 600; font-size: 13px; }
+  .cat-table td:first-child, .cat-table th:first-child { text-align: left; }
+  .cat-table tr:hover td { background: var(--card-hover); }
+
+  /* Footer */
+  .footer { text-align: center; padding: 32px; border-top: 1px solid var(--border); color: var(--dim); font-size: 12px; margin-top: 40px; }
+
+  /* Utility */
+  .empty { text-align: center; padding: 60px 20px; color: var(--dim); }
+  .empty .icon { font-size: 48px; margin-bottom: 16px; }
+  .hidden { display: none !important; }
+  .loading { text-align: center; padding: 40px; color: var(--dim); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>千问深信 · 自动化评测面板</h1>
+    <div class="subtitle">RAG 评测数据可视化 · DeepSeek Judge · 实时更新</div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="showView('dashboard')">📊 总览</button>
+    <button class="btn" onclick="showView('runs')">📋 评测记录</button>
+    <button class="btn" onclick="showView('detail')">🔍 题目详情</button>
+    <button class="btn primary" onclick="refreshData()">🔄 刷新</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== Dashboard ==================== -->
+  <div id="view-dashboard">
+    <!-- KPI -->
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi blue">
+        <div class="num" id="kpi-faithfulness">--</div>
+        <div class="label">Faithfulness<br>（答案忠实度）</div>
+      </div>
+      <div class="kpi green">
+        <div class="num" id="kpi-relevancy">--</div>
+        <div class="label">Answer Relevancy<br>（答案相关性）</div>
+      </div>
+      <div class="kpi purple">
+        <div class="num" id="kpi-composite">--</div>
+        <div class="label">综合得分</div>
+      </div>
+      <div class="kpi amber">
+        <div class="num" id="kpi-total">--</div>
+        <div class="label">评测题数<br>（累计）</div>
+      </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="section">
+      <div class="section-title">评测趋势</div>
+      <div class="section-desc">最近 10 次评测的分数变化</div>
+      <div class="chart-card">
+        <div class="chart-box" style="height:320px;"><canvas id="chartTrend"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Category + Latest -->
+    <div class="grid-2">
+      <div class="section">
+        <div class="section-title">分类表现</div>
+        <div class="section-desc">各知识类别的平均得分</div>
+        <div class="chart-card">
+          <div class="chart-box" style="height:300px;"><canvas id="chartCategory"></canvas></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">最新评测</div>
+        <div class="section-desc">最近一次评测概览</div>
+        <div class="chart-card" id="latest-summary">
+          <div class="loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Runs ==================== -->
+  <div id="view-runs" class="hidden">
+    <div class="section">
+      <div class="section-title">评测记录</div>
+      <div class="section-desc">点击任意一条查看题目详情</div>
+      <div id="runs-list">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Detail ==================== -->
+  <div id="view-detail" class="hidden">
+    <div class="section">
+      <div class="section-title" id="detail-title">题目详情</div>
+      <div class="section-desc" id="detail-desc">选择一个评测记录查看</div>
+      <div id="detail-content">
+        <div class="empty">
+          <div class="icon">📋</div>
+          <div>请先在「评测记录」中选择一条评测</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  千问深信 · 自动化评测面板 v1.0 | 评测框架：DeepSeek Judge | 数据来源：eval_results.db
+</div>
+
+<!-- ==================== JavaScript ==================== -->
+<script>
+const API = 'http://localhost:8002';
+let trendChart = null;
+let categoryChart = null;
+let currentRunId = null;
+
+// ── Utility ──
+function fmt(v) { return v === null ? '--' : (v * 100).toFixed(0) + '%'; }
+function fmtFloat(v) { return v === null ? '--' : (v * 100).toFixed(1) + '%'; }
+function scoreClass(v) { return v >= 0.7 ? 'good' : v >= 0.4 ? 'mid' : 'bad'; }
+function scoreLabel(v) { return v >= 0.7 ? '良好' : v >= 0.4 ? '待改进' : '需优化'; }
+
+// ── View switching ──
+function showView(name) {
+  ['dashboard', 'runs', 'detail'].forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== name);
+  });
+  if (name === 'runs') loadRuns();
+  if (name === 'dashboard') refreshData();
+}
+
+// ── API ──
+async function api(path) {
+  const res = await fetch(API + path);
+  if (!res.ok) throw new Error('API error: ' + res.status);
+  return res.json();
+}
+
+// ── Refresh all ──
+async function refreshData() {
+  await loadSummary();
+  await loadRuns();
+}
+
+// ── Dashboard ──
+async function loadSummary() {
+  try {
+    const data = await api('/api/summary');
+    const latest = data.latest || {};
+
+    // KPI
+    document.getElementById('kpi-faithfulness').textContent = fmt(latest.avg_faithfulness);
+    document.getElementById('kpi-relevancy').textContent = fmt(latest.avg_answer_relevancy);
+    document.getElementById('kpi-composite').textContent = fmt(latest.avg_composite);
+    document.getElementById('kpi-total').textContent = data.total_items || '--';
+
+    // Trend
+    renderTrend(data.trend || []);
+
+    // Category
+    renderCategory(data.category_avg || []);
+
+    // Latest summary
+    renderLatest(latest);
+
+  } catch (e) {
+    console.error('loadSummary failed:', e);
+  }
+}
+
+function renderTrend(trend) {
+  const labels = trend.map(t => '#' + t.id).reverse();
+  const fData = trend.map(t => t.avg_faithfulness * 100).reverse();
+  const rData = trend.map(t => t.avg_answer_relevancy * 100).reverse();
+  const cData = trend.map(t => t.avg_composite * 100).reverse();
+
+  const ctx = document.getElementById('chartTrend').getContext('2d');
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Faithfulness', data: fData, borderColor: '#4f8cff', backgroundColor: 'rgba(79,140,255,0.1)', fill: true, tension: 0.3 },
+        { label: 'Relevancy', data: rData, borderColor: '#36d399', backgroundColor: 'rgba(54,211,153,0.1)', fill: true, tension: 0.3 },
+        { label: 'Composite', data: cData, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.1)', fill: true, tension: 0.3 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', stepSize: 20 }, grid: { color: '#2d3148' } },
+        x: { grid: { display: false } }
+      },
+      plugins: { legend: { position: 'bottom', labels: { color: '#8b8fa3', font: { size: 12 } } } }
+    }
+  });
+}
+
+function renderCategory(catData) {
+  const labels = catData.map(c => c.category || '未分类');
+  const cData = catData.map(c => (c.avg_c || 0) * 100);
+
+  const ctx = document.getElementById('chartCategory').getContext('2d');
+  if (categoryChart) categoryChart.destroy();
+  categoryChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: '综合得分',
+        data: cData,
+        backgroundColor: cData.map(v => v >= 70 ? 'rgba(54,211,153,0.7)' : v >= 40 ? 'rgba(245,158,11,0.7)' : 'rgba(239,68,68,0.7)'),
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', stepSize: 20 }, grid: { color: '#2d3148' } },
+        y: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderLatest(latest) {
+  const el = document.getElementById('latest-summary');
+  if (!latest.id) {
+    el.innerHTML = '<div class="empty"><div class="icon">📊</div><div>暂无评测数据</div></div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--accent);">Run #${latest.id}</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:4px;">${latest.run_at} · ${latest.knowledge_version || 'unknown'}</div>
+      </div>
+      <button class="btn primary" onclick="showView('runs')">查看详情 →</button>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:120px;background:var(--bg);border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--accent);">${fmtFloat(latest.avg_faithfulness)}</div>
+        <div style="font-size:11px;color:var(--dim);">Faithfulness</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:var(--bg);border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--green);">${fmtFloat(latest.avg_answer_relevancy)}</div>
+        <div style="font-size:11px;color:var(--dim);">Relevancy</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:var(--bg);border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--purple);">${fmtFloat(latest.avg_composite)}</div>
+        <div style="font-size:11px;color:var(--dim);">综合得分</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--dim);display:flex;gap:16px;flex-wrap:wrap;">
+      <span>题量: ${latest.total_questions}</span>
+      <span>Judge: ${latest.judge_model}</span>
+      <span>耗时: ${latest.duration_seconds}s</span>
+    </div>
+  `;
+}
+
+// ── Runs ──
+async function loadRuns() {
+  const el = document.getElementById('runs-list');
+  try {
+    const runs = await api('/api/runs?limit=50');
+    if (!runs.length) {
+      el.innerHTML = '<div class="empty"><div class="icon">📋</div><div>暂无评测记录</div></div>';
+      return;
+    }
+    el.innerHTML = runs.map(r => `
+      <div class="run-card" onclick="showDetail(${r.id})">
+        <div class="run-id">#${r.id}</div>
+        <div class="run-info">
+          <div style="font-size:14px;font-weight:600;">${r.knowledge_version || 'unknown'}</div>
+          <div class="run-meta">${r.run_at} · ${r.total_questions} 题 · ${r.duration_seconds}s · ${r.judge_model}</div>
+        </div>
+        <div class="run-scores">
+          <span class="score-pill ${scoreClass(r.avg_faithfulness)}">F: ${fmtFloat(r.avg_faithfulness)}</span>
+          <span class="score-pill ${scoreClass(r.avg_answer_relevancy)}">R: ${fmtFloat(r.avg_answer_relevancy)}</span>
+          <span class="score-pill ${scoreClass(r.avg_composite)}" style="background:rgba(167,139,250,0.15);color:var(--purple);">${fmtFloat(r.avg_composite)}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><div class="icon">❌</div><div>加载失败: ' + e.message + '</div></div>';
+  }
+}
+
+// ── Detail ──
+async function showDetail(runId) {
+  currentRunId = runId;
+  showView('detail');
+  document.getElementById('detail-title').textContent = `评测详情 · Run #${runId}`;
+  const el = document.getElementById('detail-content');
+  el.innerHTML = '<div class="loading">加载中...</div>';
+
+  try {
+    const [run, items] = await Promise.all([
+      api('/api/runs/' + runId),
+      api('/api/runs/' + runId + '/items'),
+    ]);
+
+    // Run header
+    let html = `
+      <div class="run-card" style="cursor:default;">
+        <div class="run-id">#${run.id}</div>
+        <div class="run-info">
+          <div style="font-size:14px;font-weight:600;">${run.knowledge_version || 'unknown'}</div>
+          <div class="run-meta">${run.run_at} · ${run.total_questions} 题 · ${run.duration_seconds}s · Judge: ${run.judge_model}</div>
+        </div>
+        <div class="run-scores">
+          <span class="score-pill ${scoreClass(run.avg_faithfulness)}">Faithfulness: ${fmtFloat(run.avg_faithfulness)}</span>
+          <span class="score-pill ${scoreClass(run.avg_answer_relevancy)}">Relevancy: ${fmtFloat(run.avg_answer_relevancy)}</span>
+          <span class="score-pill" style="background:rgba(167,139,250,0.15);color:var(--purple);">综合: ${fmtFloat(run.avg_composite)}</span>
+        </div>
+      </div>
+    `;
+
+    // Items
+    items.forEach((item, idx) => {
+      const fColor = item.faithfulness >= 0.7 ? 'var(--green)' : item.faithfulness >= 0.4 ? 'var(--amber)' : 'var(--red)';
+      const rColor = item.answer_relevancy >= 0.7 ? 'var(--green)' : item.answer_relevancy >= 0.4 ? 'var(--amber)' : 'var(--red)';
+      const ans = item.answer ? item.answer.substring(0, 400) + (item.answer.length > 400 ? '...' : '') : '<em style="color:var(--red)">（空答案）</em>';
+
+      html += `
+        <div class="item-card">
+          <div class="item-header">
+            <span class="item-id">#${idx + 1}</span>
+            <span class="item-category">${item.category || '未分类'}</span>
+            <span style="font-size:12px;color:var(--dim);margin-left:auto;">${item.question_id} · ${item.latency_ms}ms</span>
+          </div>
+          <div class="item-q">${item.question}</div>
+          <div class="item-scores">
+            <span class="score-pill" style="background:${fColor}20;color:${fColor}">Faithfulness: ${item.faithfulness.toFixed(1)}</span>
+            <span class="score-pill" style="background:${rColor}20;color:${rColor}">Relevancy: ${item.answer_relevancy.toFixed(1)}</span>
+            <span class="score-pill" style="background:rgba(167,139,250,0.15);color:var(--purple);">综合: ${item.composite.toFixed(1)}</span>
+          </div>
+          <div class="item-body">
+            <div>
+              <div class="section-label">参考答案</div>
+              <div class="item-ref">${item.reference || '--'}</div>
+            </div>
+            <div>
+              <div class="section-label">系统答案</div>
+              <div class="item-ans">${ans}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    el.innerHTML = html;
+
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><div class="icon">❌</div><div>加载失败: ' + e.message + '</div></div>';
+  }
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  refreshData();
+});
+</script>
+</body>
+</html>
